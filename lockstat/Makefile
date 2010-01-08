@@ -5,12 +5,12 @@
 # other than the one currently installed on your machine, define it in
 # your environment or on the make command line.
 ifndef LINUX_INC_ROOT
-LINUX_INC_ROOT = ../../linux/linux/include
+LINUX_INC_ROOT = ../linux-2.6.16-lockmeter/include
 endif
 
 PROGS	= lockstat
-CC	= gcc
-CFLAGS	= -O2 -fomit-frame-pointer -I$(LINUX_INC_ROOT)
+CC	= gcc-3.4
+CFLAGS	= -O2 -fomit-frame-pointer -I$(LINUX_INC_ROOT) -DCONFIG_LOCKMETER
 
 default all: $(PROGS)
 
