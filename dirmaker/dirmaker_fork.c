@@ -42,22 +42,24 @@ worker(void *args)
 {
     int id = (long) args;
     int l1n, l2n, l3n;
-    int i;
     char dirname[1024];
 
     affinity_set(id);
 
-    for (i = NR_ALLDIRS / nr_threads * id; i < NR_ALLDIRS / nr_threads * (id+1); i++) {
-        l1n = i / NR_SUBDIRS / NR_SUBDIRS;
-        l2n = (i - l1n * NR_SUBDIRS * NR_SUBDIRS) / NR_SUBDIRS;
-        l3n = i - l1n * NR_SUBDIRS * NR_SUBDIRS - l2n * NR_SUBDIRS;
-
-        sprintf(dirname, "%s%d", PATH_PREFIX, l1n);
+    sprintf(dirname, "%s%d", PATH_PREFIX, id);
+    create_dir(dirname);
+    
+    for (l1n = 0; l1n < NR_SUBDIRS; l1n++) {
+        sprintf(dirname, "%s%d/%d", PATH_PREFIX, id, l1n);
         create_dir(dirname);
-        sprintf(dirname, "%s%d/%d", PATH_PREFIX, l1n, l2n);
-        create_dir(dirname);
-        sprintf(dirname, "%s%d/%d/%d", PATH_PREFIX, l1n, l2n, l3n);
-        create_dir(dirname);
+        for (l2n = 0; l2n < NR_SUBDIRS; l2n++) {
+            sprintf(dirname, "%s%d/%d/%d", PATH_PREFIX, id, l1n, l2n);
+            create_dir(dirname);
+            for (l3n = 0; l3n < NR_SUBDIRS; l3n++) {
+                sprintf(dirname, "%s%d/%d/%d/%d", PATH_PREFIX, id, l1n, l2n, l3n);
+                create_dir(dirname);
+            }
+        }
     }
 
     return NULL;
