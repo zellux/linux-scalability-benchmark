@@ -1,0 +1,33 @@
+This directory contains the latest lockmeter kernel patch against the LBS
+source tree and the "lockstat" command.
+
+To patch the kernel, p_tupdate the latest LBS source, then cd to the root
+of the kernel source and enter:
+  cp lockmeter-lbs.diff ../../linux/linux
+  cd ../../linux/linux
+  applypatch -a -m lockmeter-lbs.diff
+Start with an appropriate .config, then "make oldconfig" and enable the
+Lockmeter config option.
+
+Lockstat is the basic tool used to control the kernel's Lockmeter
+functionality:  e.g., turning the kernel's data gathering on or off, and
+retrieving that data from the kernel so that Lockstat can massage it and
+produce printed reports.  See http://oss.sgi.com/projects/lockmeter for
+details.
+
+The default lockstat/Makefile only builds the basic Lockstat tool.  The
+alternative lockstat/Makefile.pcp (e.g., make -f Makefile.pcp) builds both
+Lockstat and the various PCP components.
+
+Compiling Lockstat requires the kernel file "lockmeter.h", which is found in
+source tree of a lockmeter-capable kernel (i.e., a kernel that has been patched
+by the lockmeter patch).  The Lockstat Makefile expects that the symbol
+LINUX_INC_ROOT points to such a lockmeter-capable kernel source tree.
+LINUX_INC_ROOT defaults to $WORKAREA/work/linux/linux/include".
+If this default is incorrect, then you must redefine the symbol as appropriate
+before attempting the 'make'.
+
+Questions?  Send email to owner-lockmeter@oss.sgi.com or to the entire
+mailing list, lockmeter@oss.sgi.com.  Feel free to join the mailing list by
+sending email to majordomo@oss.sgi.com with a text body
+	subscribe lockmeter <your-email-address>
