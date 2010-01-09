@@ -2,3 +2,4 @@ syntax: glob
 
 linux*/
 mmapbench/share.dat
+dbench*/

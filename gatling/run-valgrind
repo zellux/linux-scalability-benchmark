@@ -1,0 +1,1 @@
+valgrind --leak-check=yes --show-reachable=yes --leak-resolution=high --num-callers=40 gatling
