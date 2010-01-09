@@ -3,8 +3,8 @@
 import os, re
 from subprocess import *
 
-corelist = [1, 2, 3, 4]
-repeat = 3
+corelist = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+repeat = 5
 
 def warmup():
 	print('Warming up...')

@@ -18,7 +18,7 @@
 #define MAX_LINE 1024
 #define LISTENQ  1024
 
-#define DEV133
+#define R900
 
 #ifdef R900
 const char *serverip[] = {
@@ -75,7 +75,7 @@ server_work(void *args)
         break;
     }
     if (port[id] < 0) {
-        fprintf(stderr, "Error calling bind()\n");
+        perror("bind");
         exit(EXIT_FAILURE);
     }
 
