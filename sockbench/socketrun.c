@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <sys/socket.h>       /*  socket definitions        */
 #include <sys/types.h>        /*  socket types              */
 #include <arpa/inet.h>        /*  inet (3) funtions         */
@@ -8,14 +10,37 @@
 #include <pthread.h>
 #include <assert.h>
 #include <netdb.h>
+#include <sched.h>
+
+#include "bench.h"
 
 #define CONNECTS 10000
 #define MAX_LINE 1024
-#define LISTENQ 1024
+#define LISTENQ  1024
 
-const char *serverip[] = {"10.131.1.133"};
-int nservers = sizeof(serverip) / sizeof(char *);
-int port[sizeof(serverip) / sizeof(char *)];
+#define DEV133
+
+#ifdef R900
+const char *serverip[] = {
+    "10.132.143.204", 
+    "10.132.143.205", 
+    "10.132.143.206", 
+    "10.132.143.207",
+    "10.132.143.208", 
+    "10.132.143.209", 
+    "10.132.143.210", 
+    "10.132.143.211"
+};
+#endif
+
+#ifdef DEV133
+const char *serverip[] = {
+    "10.131.1.133"
+};
+#endif
+
+int nservers = 8;
+int port[8];
 
 void *
 server_work(void *args)
@@ -24,6 +49,8 @@ server_work(void *args)
     int listenfd, connfd;
     struct sockaddr_in servaddr;
     unsigned short p;
+
+    affinity_set(id);
 
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family      = AF_INET;
@@ -83,12 +110,14 @@ client_work(void *args)
     struct sockaddr_in serveraddr;
     int i;
 
+    affinity_set(id);
     if (!inet_pton(AF_INET, serverip[id], &ip)) {
-        perror("inet_aton");
+        printf("[%d] ", id);
+        perror("inet_pton");
         exit(EXIT_FAILURE);
     }
     
-    printf("Client #%d, connecting to %s:%d\n", id, serverip[id], port[id]);
+    /* printf("Client #%d, connecting to %s:%d\n", id, serverip[id], port[id]); */
     
     /* if ((hp = gethostbyaddr((const void *) &ip, sizeof(ip), AF_INET)) == NULL) { */
     /*     perror("gethostbyaddr"); */
@@ -108,8 +137,10 @@ client_work(void *args)
         }
 
         if (connect(clientfd, (const struct sockaddr *) &serveraddr, sizeof(serveraddr)) < 0) {
-            printf("Time #%d, fd=%d", i, clientfd);
+            printf("[%d] Time #%d, fd=%d", id, i, clientfd);
             perror("connect");
+            fflush(stdout);
+            fflush(stderr);
             exit(EXIT_FAILURE);
         }
         close(clientfd);
@@ -121,10 +152,18 @@ client_work(void *args)
 int 
 main(int argc, char *argv[]) {
     int i;
-    pthread_t tid[nservers];
+    pthread_t tid[8];
     int flag;
+    int arg;
+    uint64_t start, end, usec;
 
-    printf("Starting servers...\n");
+    if (argv[1] != NULL) {
+        arg = atoi(argv[1]);
+        if (arg < nservers)
+            nservers = arg;
+    }
+
+    printf("Starting servers, total %d...\n", nservers);
     for (i = 0; i < nservers; i++) {
         port[i] = -1;
         pthread_create(&tid[i], NULL, server_work, (void *) (long) i);
@@ -139,7 +178,8 @@ main(int argc, char *argv[]) {
     }
 
     printf("Starting clients...\n");
-    printf("[Timing begins]\n");
+    
+    start = read_tsc();
     for (i = 0; i < nservers; i++) {
         pthread_create(&tid[i], NULL, client_work, (void *) (long) i);
     }
@@ -147,8 +187,9 @@ main(int argc, char *argv[]) {
     for (i = 0; i < nservers; i++) {
         pthread_join(tid[i], NULL);
     }
-    printf("[Timing ends]\n");
-    
-    
+    end = read_tsc();
+    usec = (end - start) * 1000000 / get_cpu_freq();
+    printf("usec: %ld\t\n", usec);
+
     return 0;
 }

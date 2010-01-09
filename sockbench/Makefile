@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-O2 -Wall -pthread
 
-socketrun: socketrun.o helper.o
+socketrun: socketrun.o 
 	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:
