@@ -11,4 +11,4 @@ dirmaker_fork: dirmaker_fork.o
 
 clean:
 	rm -rf *.o
-	rm -rf dirmaker
+	rm -rf dirmaker dirmaker_fork
