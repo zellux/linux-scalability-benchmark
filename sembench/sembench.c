@@ -10,7 +10,6 @@
 #include <pthread.h>
 #include <assert.h>
 #include <netdb.h>
-#include <sys/shm.h>
 #include <sys/sem.h>
 #include <sys/ipc.h>
 #include <sys/wait.h>
@@ -35,8 +34,9 @@ main(int argc, char *argv[]) {
     key = 1000;
     for (i = 0; i < nchilds; i++) {
         printf("Getting semaphore #%d...", i);
-        while ((semid[i] = shmget(key, 2, 0666 | IPC_CREAT)) < 0)
+        do {
             key ++;
+        } while ((semid[i] = semget(key, 2, 0666 | IPC_CREAT)) < 0);
         printf("<%d>\n", key);
         semkey[i] = key;
         /* Init semephore array with {1, 0}, so the ping process will run first */
@@ -48,6 +48,7 @@ main(int argc, char *argv[]) {
     start = read_tsc();
     for (i = 0; i < nchilds; i++) {
         pid[i] = fork();
+        affinity_set(i);
         if (pid[i] == 0) {
             sprintf(buf, "%d", semkey[i]);
             execlp("./pingpong", "./pingpong", buf, (char *) NULL);

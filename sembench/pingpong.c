@@ -4,8 +4,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/ipc.h>
-#include <sys/shm.h>
+#include <sys/wait.h>
 #include <sys/sem.h>
+
+#include "config.h"
 
 static int
 ping(int semid)
@@ -62,7 +64,7 @@ main(int argc, char *argv[])
         semid = semget(semkey, 2, 0666);
     } else {
         semkey = 1001;
-        if ((semid = shmget(semkey, 2, 0666 | IPC_CREAT)) < 0)
+        if ((semid = semget(semkey, 2, 0666 | IPC_CREAT)) < 0)
             exit(-1);
         /* Init semephore array with {1, 0}, so the ping process will run first */
         semctl(semid, 0, SETVAL, 1);
@@ -72,15 +74,14 @@ main(int argc, char *argv[])
     printf("pingpong begin with semkey=%d, semid=%d\n", semkey, semid);
     pid = fork();
     if (pid == 0) {
-        for (i = 0; i < 10; i++) {
-            printf("ping\n");
+        for (i = 0; i < NR_PINGPONGS; i++) {
             ping(semid);
         }
     } else {
-        for (i = 0; i < 10; i++) {
-            printf("pong\n");
+        for (i = 0; i < NR_PINGPONGS; i++) {
             pong(semid);
         }
+        waitpid(pid, NULL, 0);
     }
 
     return 0;
