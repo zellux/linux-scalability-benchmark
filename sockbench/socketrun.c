@@ -18,7 +18,7 @@
 #define MAX_LINE 1024
 #define LISTENQ  1024
 
-#define R900
+#define DEV198
 
 #ifdef R900
 const char *serverip[] = {
@@ -36,6 +36,12 @@ const char *serverip[] = {
 #ifdef DEV133
 const char *serverip[] = {
     "10.131.1.133"
+};
+#endif
+
+#ifdef DEV198
+const char *serverip[] = {
+    "10.131.1.198"
 };
 #endif
 
@@ -79,7 +85,7 @@ server_work(void *args)
         exit(EXIT_FAILURE);
     }
 
-    printf("Server #%d port:%d\n", id, p);
+    printf("Server #%d %s:%d\n", id, serverip[id], p);
 
     if (listen(listenfd, LISTENQ) < 0 ) {
         fprintf(stderr, "Error calling listen()\n");
