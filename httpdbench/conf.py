@@ -16,6 +16,7 @@ mimetype.assign = (
 index-file.names = ("index.html")
 '''
 
+webdir = './'
 iplist = ['10.131.1.133']
 port = 8111
 
