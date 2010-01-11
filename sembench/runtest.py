@@ -3,8 +3,7 @@
 import os, re, math
 from subprocess import *
 
-# corelist = [1]
-corelist = [1, 2, 3, 4, 5, 6, 7, 8]
+corelist = range(1, 5)
 repeat = 10
 
 log = open('stat.log', 'w')
@@ -24,7 +23,7 @@ def avg(num):
 
 def warmup():
     print('Warming up...')
-    p = Popen('./sockbench 1', shell=True, stdout=PIPE)
+    p = Popen('./sembench 1', shell=True, stdout=PIPE)
     os.waitpid(p.pid, 0)
 
 def test():
@@ -33,14 +32,14 @@ def test():
     for n in corelist:
         stats = []
         for i in xrange(repeat):
-            p = Popen('./sockbench %d' % n, shell=True, stdout=PIPE)
+            p = Popen('./sembench %d' % n, shell=True, stdout=PIPE)
             os.waitpid(p.pid, 0)
             output = p.stdout.read().strip()
             usec = int(pattern.search(output).group(1))
             stats.append(usec)
             log.write('%d: %d\n' % (n, usec))
             print('%d: %d' % (n, usec))
-        print('Core #%d: averge %f, std deviation %f' % (n, avg(stats), stddev(stats)))
+        print('Core #%d: averge %.0f, std deviation%% %.2f' % (n, avg(stats), (stddev(stats) / avg(stats))))
 
 warmup()
 test()
