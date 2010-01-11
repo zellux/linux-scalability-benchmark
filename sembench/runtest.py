@@ -23,7 +23,7 @@ def avg(num):
 
 def warmup():
     print('Warming up...')
-    p = Popen('./sembench 1', shell=True, stdout=PIPE)
+    p = Popen('./pingpong 1', shell=True, stdout=PIPE)
     os.waitpid(p.pid, 0)
 
 def test():
@@ -32,13 +32,13 @@ def test():
     for n in corelist:
         stats = []
         for i in xrange(repeat):
-            p = Popen('./sembench %d' % n, shell=True, stdout=PIPE)
+            p = Popen('./pingpong %d' % n, shell=True, stdout=PIPE)
             os.waitpid(p.pid, 0)
             output = p.stdout.read().strip()
             usec = int(pattern.search(output).group(1))
             stats.append(usec)
             log.write('%d: %d\n' % (n, usec))
-            print('%d: %d' % (n, usec))
+            # print('%d: %d' % (n, usec))
         print('Core #%d: averge %.0f, std deviation%% %.2f' % (n, avg(stats), (stddev(stats) / avg(stats))))
 
 warmup()

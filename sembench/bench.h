@@ -1,8 +1,6 @@
 #ifndef _BENCH_H_
 #define _BENCH_H_
 
-#include <sched.h>
-
 static int
 affinity_set(int cpu)
 {
@@ -48,22 +46,5 @@ read_tsc(void)
     return ((uint64_t) a) | (((uint64_t) d) << 32);
 }
 
-typedef uint64_t atomic_t;
-
-#define LOCK_PREFIX \
-		".section .smp_locks,\"a\"\n"	\
-		"  .align 4\n"			\
-		"  .long 661f\n" /* address */	\
-		".previous\n"			\
-	       	"661:\n\tlock; "
-
-static __inline__ void
-atomic_add(int i, uint64_t *v)
-{
-	__asm__ __volatile__(
-		LOCK_PREFIX "addl %1,%0"
-		:"+m" (v)
-		:"ir" (i));
-}
 
 #endif /* _BENCH_H_ */
